@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "labellens"
+version = "0.1.0"
+description = "Desktop application for labeling image datasets for machine learning classification tasks."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = ["Pillow"]
+
+[project.scripts]
+labellens = "labellens.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 88
+src = ["src"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
