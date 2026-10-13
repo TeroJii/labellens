@@ -1,20 +1,9 @@
 # LabelLens
 An app for assigning class labels to images in a folder.
 
-## Planned interaction workflow
+## Planned UI
 
-1. Select folder
-2. Scan supported image files
-3. Enter permitted labels
-4. Validate and create label controls
-5. Display first image
-6. Choose label
-7. Store label in session
-8. Automatically advance to next image
-9. Repeat until all images are labelled
-10. Export CSV
-
-## UI layout plan
+The initial proof-of-concept will use a simple Tkinter-based desktop interface.
 
 ```text
 +----------------------------------------------------------------+
@@ -39,4 +28,25 @@ An app for assigning class labels to images in a folder.
 |                                                                |
 | [Save progress]                              [Export CSV]      |
 +----------------------------------------------------------------+
+```
+
+### Workflow
+
+1. Select folder
+2. Scan supported image files
+3. Enter permitted labels
+4. Validate and create label controls
+5. Display first image
+6. Choose label
+7. Store label in session
+8. Automatically advance to next image
+9. Repeat until all images are labelled
+10. Export CSV
+
+### Example output
+
+```csv
+filename, label
+IMG_001.jpg, cat
+IMG_002.jpg, dog
 ```
