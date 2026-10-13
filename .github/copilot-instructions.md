@@ -214,3 +214,7 @@ Design code so that the following can be added later without major refactoring:
 - Train/validation/test split export
 
 Favor extensibility, but keep the initial implementation simple.
+
+## Changes to the main branch
+
+Changes to the main branch should only be submitted via pull requests. Please open a new branch when starting work on a new issue.
