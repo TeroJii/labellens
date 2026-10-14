@@ -22,6 +22,8 @@ class App:
         self._root.geometry("900x600")
         self._session: LabelingSession = LabelingSession()
         self._photo: ImageTk.PhotoImage | None = None
+        self._loaded_image: Image.Image | None = None
+        self._loaded_image_path: Path | None = None
         self._build_ui()
         self._bind_keys()
 
@@ -111,15 +113,31 @@ class App:
         self._canvas.delete("all")
         img_path = self._session.current_image
         if img_path is None:
-            return
-        try:
-            img = Image.open(img_path)
-        except Exception as exc:
-            messagebox.showerror("Image error", str(exc))
+            self._loaded_image = None
+            self._loaded_image_path = None
             return
 
-        cw = self._canvas.winfo_width() or _DISPLAY_MAX[0]
-        ch = self._canvas.winfo_height() or _DISPLAY_MAX[1]
+        if img_path != self._loaded_image_path:
+            try:
+                self._loaded_image = Image.open(img_path)
+            except Exception as exc:
+                messagebox.showerror("Image error", str(exc))
+                self._loaded_image = None
+                self._loaded_image_path = None
+                return
+            self._loaded_image_path = img_path
+
+        if self._loaded_image is None:
+            return
+
+        cw = self._canvas.winfo_width()
+        ch = self._canvas.winfo_height()
+        if cw <= 1:
+            cw = _DISPLAY_MAX[0]
+        if ch <= 1:
+            ch = _DISPLAY_MAX[1]
+
+        img = self._loaded_image.copy()
         img.thumbnail((cw, ch), Image.LANCZOS)
 
         self._photo = ImageTk.PhotoImage(img)
