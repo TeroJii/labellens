@@ -6,6 +6,7 @@ from tkinter import filedialog, messagebox
 
 from PIL import Image, ImageTk
 
+from labellens.csv_exporter import export_csv
 from labellens.image_scanner import scan_images
 from labellens.session import LabelingSession, parse_labels
 
@@ -101,7 +102,9 @@ class App:
         for i in range(1, 10):
             self._root.bind(
                 str(i),
-                lambda _e, idx=i - 1: self._select_label_by_index(idx),
+                lambda _e, idx=i - 1: self._select_label_by_index(idx)
+                if self._root.focus_get() is not self._labels_entry
+                else None,
             )
         self._root.bind("<Control-s>", lambda _e: self._export())
 
@@ -171,8 +174,6 @@ class App:
 
     def _export(self) -> None:
         """Export annotations to CSV."""
-        from labellens.csv_exporter import export_csv
-
         path = filedialog.asksaveasfilename(
             defaultextension=".csv",
             filetypes=[("CSV files", "*.csv")],
