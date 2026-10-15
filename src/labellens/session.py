@@ -4,6 +4,30 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 
+def parse_labels(raw: str) -> list[str]:
+    """Parse and validate a comma-separated label string.
+
+    Args:
+        raw: Comma-separated label names entered by the user.
+
+    Returns:
+        A deduplicated, whitespace-trimmed list of labels.
+
+    Raises:
+        ValueError: If fewer than two distinct valid labels are provided.
+    """
+    seen: set[str] = set()
+    labels: list[str] = []
+    for part in raw.split(","):
+        label = part.strip()
+        if label and label not in seen:
+            seen.add(label)
+            labels.append(label)
+    if len(labels) < 2:
+        raise ValueError("At least two distinct labels are required.")
+    return labels
+
+
 @dataclass
 class LabelingSession:
     """Holds the state of an active labeling session."""
@@ -34,6 +58,10 @@ class LabelingSession:
         """Assign *label* to the current image."""
         if self.current_image is not None:
             self.annotations[self.current_image] = label
+
+    def set_labels(self, labels: list[str]) -> None:
+        """Replace label definitions without resetting navigation state."""
+        self.labels[:] = labels
 
     def is_complete(self) -> bool:
         """Return True when every image has been labeled."""

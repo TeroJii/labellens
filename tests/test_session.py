@@ -40,6 +40,17 @@ def test_assign_label() -> None:
     assert session.annotations[Path("img_0.jpg")] == "cat"
 
 
+def test_set_labels_preserves_navigation_state() -> None:
+    session = _make_session(3)
+    session.next_image()
+    session.next_image()
+    session.assign_label("dog")
+    session.set_labels(["cat", "dog", "other"])
+    assert session.current_image == Path("img_2.jpg")
+    assert session.annotations[Path("img_2.jpg")] == "dog"
+    assert session.labels == ["cat", "dog", "other"]
+
+
 def test_is_complete_false_when_unlabeled() -> None:
     session = _make_session()
     assert not session.is_complete()
