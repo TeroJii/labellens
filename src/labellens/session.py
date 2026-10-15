@@ -59,6 +59,10 @@ class LabelingSession:
         if self.current_image is not None:
             self.annotations[self.current_image] = label
 
+    def set_labels(self, labels: list[str]) -> None:
+        """Replace label definitions without resetting navigation state."""
+        self.labels[:] = labels
+
     def is_complete(self) -> bool:
         """Return True when every image has been labeled."""
         return bool(self.images) and all(

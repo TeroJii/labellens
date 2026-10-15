@@ -135,11 +135,7 @@ class App:
         except ValueError as exc:
             messagebox.showerror("Invalid labels", str(exc))
             return
-        self._session = LabelingSession(
-            images=self._session.images,
-            labels=labels,
-            annotations=self._session.annotations,
-        )
+        self._session.set_labels(labels)
         self._rebuild_label_buttons()
         self._restore_label_selection()
 
