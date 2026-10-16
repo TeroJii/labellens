@@ -66,3 +66,29 @@ def test_is_complete_true_when_all_labeled() -> None:
 def test_empty_session_has_no_current_image() -> None:
     session = LabelingSession()
     assert session.current_image is None
+
+
+def test_progress_initially_zero() -> None:
+    session = _make_session(3)
+    labeled, total = session.progress()
+    assert labeled == 0
+    assert total == 3
+
+
+def test_progress_increments_with_labels() -> None:
+    session = _make_session(3)
+    session.assign_label("cat")
+    labeled, total = session.progress()
+    assert labeled == 1
+    assert total == 3
+
+
+def test_progress_complete() -> None:
+    session = _make_session(2)
+    session.assign_label("cat")
+    session.next_image()
+    session.assign_label("cat")
+    labeled, total = session.progress()
+    assert labeled == total == 2
+
+

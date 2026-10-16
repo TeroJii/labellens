@@ -63,6 +63,12 @@ class LabelingSession:
         """Replace label definitions without resetting navigation state."""
         self.labels[:] = labels
 
+    def progress(self) -> tuple[int, int]:
+        """Return ``(labeled_count, total_count)`` for the current session."""
+        total = len(self.images)
+        labeled = sum(1 for img in self.images if img in self.annotations)
+        return labeled, total
+
     def is_complete(self) -> bool:
         """Return True when every image has been labeled."""
         return bool(self.images) and all(
