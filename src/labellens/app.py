@@ -45,6 +45,9 @@ class App:
         self._info_var = tk.StringVar(value="No folder selected")
         tk.Label(toolbar, textvariable=self._info_var).pack(side=tk.LEFT, padx=12)
 
+        self._progress_var = tk.StringVar(value="")
+        tk.Label(toolbar, textvariable=self._progress_var).pack(side=tk.LEFT, padx=12)
+
         # Label definition row
         label_row = tk.Frame(self._root)
         label_row.pack(side=tk.TOP, fill=tk.X, padx=8, pady=2)
@@ -142,6 +145,7 @@ class App:
     def _assign_label(self, label: str) -> None:
         """Assign *label* to the current image."""
         self._session.assign_label(label)
+        self._update_info()
 
     def _select_label_by_index(self, idx: int) -> None:
         """Select the label at *idx* (0-based) using a keyboard shortcut."""
@@ -200,10 +204,13 @@ class App:
         images = self._session.images
         if not images:
             self._info_var.set("No folder selected")
+            self._progress_var.set("")
             return
         idx = images.index(self._session.current_image)  # type: ignore[arg-type]
         name = self._session.current_image.name  # type: ignore[union-attr]
         self._info_var.set(f"{name}  [{idx + 1} / {len(images)}]")
+        labeled, total = self._session.progress()
+        self._progress_var.set(f"{labeled} / {total} labeled")
 
     def _display_current(self) -> None:
         """Render the current image on the canvas."""
