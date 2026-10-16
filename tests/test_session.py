@@ -80,8 +80,9 @@ def test_progress_increments_with_labels() -> None:
 
 def test_progress_complete() -> None:
     session = _make_session(2)
-    for img in session.images:
-        session.annotations[img] = "cat"
+    session.assign_label("cat")
+    session.next_image()
+    session.assign_label("cat")
     labeled, total = session.progress()
     assert labeled == total == 2
 
