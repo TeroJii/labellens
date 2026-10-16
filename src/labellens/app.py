@@ -22,10 +22,12 @@ class App:
         self._root.title("LabelLens")
         self._root.geometry("900x700")
         self._session: LabelingSession = LabelingSession()
+        self._image_folder: Path | None = None
         self._photo: ImageTk.PhotoImage | None = None
         self._loaded_image: Image.Image | None = None
         self._loaded_image_path: Path | None = None
         self._label_var = tk.StringVar()
+        self._csv_name_var = tk.StringVar(value="classlabels.csv")
         self._build_ui()
         self._bind_keys()
 
@@ -63,10 +65,24 @@ class App:
         self._label_buttons_frame = tk.Frame(self._root)
         self._label_buttons_frame.pack(side=tk.TOP, fill=tk.X, padx=8, pady=2)
 
+        # CSV export row
+        export_row = tk.Frame(self._root)
+        export_row.pack(side=tk.BOTTOM, fill=tk.X, padx=8, pady=2)
+
+        tk.Label(export_row, text="CSV filename:").pack(side=tk.LEFT)
+        self._csv_name_entry = tk.Entry(
+            export_row, textvariable=self._csv_name_var, width=24
+        )
+        self._csv_name_entry.pack(side=tk.LEFT, padx=4)
+        tk.Button(export_row, text="Export CSV", command=self._export).pack(
+            side=tk.LEFT, padx=4
+        )
+
         nav = tk.Frame(self._root)
         nav.pack(side=tk.BOTTOM, pady=6)
 
         tk.Button(nav, text="← Previous", command=self._prev).pack(side=tk.LEFT, padx=4)
+        tk.Button(nav, text="Skip", command=self._skip).pack(side=tk.LEFT, padx=4)
         tk.Button(nav, text="Next →", command=self._next).pack(side=tk.LEFT, padx=4)
 
         self._canvas = tk.Canvas(
@@ -106,7 +122,7 @@ class App:
             self._root.bind(
                 str(i),
                 lambda _e, idx=i - 1: self._select_label_by_index(idx)
-                if self._root.focus_get() is not self._labels_entry
+                if self._root.focus_get() not in (self._labels_entry, self._csv_name_entry)
                 else None,
             )
         self._root.bind("<Control-s>", lambda _e: self._export())
@@ -125,6 +141,7 @@ class App:
         except ValueError as exc:
             messagebox.showerror("Error", str(exc))
             return
+        self._image_folder = Path(folder)
         self._session = LabelingSession(images=images, labels=self._session.labels)
         self._update_info()
         self._display_current()
@@ -143,9 +160,10 @@ class App:
         self._restore_label_selection()
 
     def _assign_label(self, label: str) -> None:
-        """Assign *label* to the current image."""
+        """Assign *label* to the current image and advance to the next image."""
         self._session.assign_label(label)
         self._update_info()
+        self._next()
 
     def _select_label_by_index(self, idx: int) -> None:
         """Select the label at *idx* (0-based) using a keyboard shortcut."""
@@ -153,6 +171,15 @@ class App:
             label = self._session.labels[idx]
             self._label_var.set(label)
             self._assign_label(label)
+
+    def _skip(self) -> None:
+        """Skip the current image without assigning a label."""
+        if not self._session.images:
+            return
+        self._session.next_image()
+        self._update_info()
+        self._display_current()
+        self._restore_label_selection()
 
     def _prev(self) -> None:
         """Navigate to the previous image."""
@@ -173,28 +200,21 @@ class App:
         self._restore_label_selection()
 
     def _export(self) -> None:
-        """Export annotations to CSV."""
+        """Export annotations to CSV in the image folder."""
         if not self._session.images:
             messagebox.showerror("Export failed", "No images loaded.")
             return
-        if not self._session.is_complete():
-            labeled, total = self._session.progress()
-            messagebox.showerror(
-                "Export blocked",
-                f"All images must be labeled before exporting.\n"
-                f"{labeled} of {total} labeled.",
-            )
+        if self._image_folder is None:
+            messagebox.showerror("Export failed", "Image folder is not set.")
             return
-        path = filedialog.asksaveasfilename(
-            defaultextension=".csv",
-            filetypes=[("CSV files", "*.csv")],
-            title="Save annotations",
-        )
-        if not path:
-            return
+        raw_name = self._csv_name_var.get().strip() or "classlabels.csv"
+        csv_name = Path(raw_name).name or "classlabels.csv"
+        if not csv_name.lower().endswith(".csv"):
+            csv_name += ".csv"
+        output_path = self._image_folder / csv_name
         try:
-            export_csv(self._session.annotations, Path(path))
-            messagebox.showinfo("Exported", f"Annotations saved to {path}")
+            export_csv(self._session.annotations, output_path)
+            messagebox.showinfo("Exported", f"Annotations saved to {output_path}")
         except Exception as exc:
             messagebox.showerror("Export failed", str(exc))
 
