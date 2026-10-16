@@ -174,6 +174,17 @@ class App:
 
     def _export(self) -> None:
         """Export annotations to CSV."""
+        if not self._session.images:
+            messagebox.showerror("Export failed", "No images loaded.")
+            return
+        if not self._session.is_complete():
+            labeled, total = self._session.progress()
+            messagebox.showerror(
+                "Export blocked",
+                f"All images must be labeled before exporting.\n"
+                f"{labeled} of {total} labeled.",
+            )
+            return
         path = filedialog.asksaveasfilename(
             defaultextension=".csv",
             filetypes=[("CSV files", "*.csv")],
