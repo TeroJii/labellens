@@ -122,7 +122,7 @@ class App:
             self._root.bind(
                 str(i),
                 lambda _e, idx=i - 1: self._select_label_by_index(idx)
-                if self._root.focus_get() is not self._labels_entry
+                if self._root.focus_get() not in (self._labels_entry, self._csv_name_entry)
                 else None,
             )
         self._root.bind("<Control-s>", lambda _e: self._export())
