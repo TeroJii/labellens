@@ -209,7 +209,7 @@ class App:
             return
         raw_name = self._csv_name_var.get().strip() or "classlabels.csv"
         csv_name = Path(raw_name).name or "classlabels.csv"
-        if not csv_name.endswith(".csv"):
+        if not csv_name.lower().endswith(".csv"):
             csv_name += ".csv"
         output_path = self._image_folder / csv_name
         try:
